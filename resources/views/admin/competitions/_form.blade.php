@@ -74,7 +74,7 @@
         <x-input-label for="logo" value="Logo (optionnel)" />
         <div class="mt-1 flex items-center gap-3">
             @if ($competition?->logo_path)
-                <x-avatar :path="$competition->logo_path" :name="$competition->name" size="lg" />
+                <x-avatar :path="$competition->logo_path" :name="$competition->name" size="xl" />
             @endif
             <input id="logo" name="logo" type="file" accept="image/*" class="block w-full text-sm text-text-muted file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-primary file:text-black file:text-xs file:font-semibold file:uppercase" />
         </div>

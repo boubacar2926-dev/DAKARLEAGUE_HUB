@@ -28,7 +28,7 @@
                                 <span class="text-xs text-text-muted">{{ $competition->season }}</span>
                             </div>
                             <div class="flex items-center gap-2">
-                                <x-avatar :path="$competition->logo_path" :name="$competition->name" size="xs" />
+                                <x-avatar :path="$competition->logo_path" :name="$competition->name" size="sm" />
                                 <div class="font-display font-semibold text-white">{{ $competition->name }}</div>
                             </div>
                             <div class="text-xs text-text-muted mt-2">{{ $competition->teams_count }} équipes · {{ $competition->matches_count }} matchs</div>
@@ -42,7 +42,7 @@
                     <h3 class="font-display font-semibold text-white mb-4">Prochaines rencontres</h3>
                     @forelse ($upcomingMatches as $match)
                         <div class="flex items-center justify-between py-2 border-b border-border last:border-0 text-sm">
-                            <span class="text-white">{{ $match->homeTeam->name }} — {{ $match->awayTeam->name }}</span>
+                            <x-match-teams :match="$match" />
                             <span class="text-text-muted">{{ $match->scheduled_at?->format('d/m/Y H:i') }}</span>
                         </div>
                     @empty
@@ -54,7 +54,7 @@
                     <h3 class="font-display font-semibold text-white mb-4">Résultats à saisir</h3>
                     @forelse ($pendingResults as $match)
                         <div class="flex items-center justify-between py-2 border-b border-border last:border-0 text-sm">
-                            <span class="text-white">{{ $match->homeTeam->name }} — {{ $match->awayTeam->name }}</span>
+                            <x-match-teams :match="$match" />
                             <a href="{{ route('admin.matches.result.edit', $match) }}" class="text-primary hover:underline">Saisir</a>
                         </div>
                     @empty

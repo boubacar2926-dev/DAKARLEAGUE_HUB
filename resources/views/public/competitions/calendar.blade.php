@@ -21,7 +21,7 @@
                                     <div class="px-4 py-3">
                                         <div class="flex items-center justify-between text-sm">
                                             <span class="flex items-center gap-2 text-white w-2/5">
-                                                <x-avatar :path="$match->homeTeam->logo_path" :name="$match->homeTeam->name" size="xs" />
+                                                <x-avatar :path="$match->homeTeam->logo_path" :name="$match->homeTeam->name" size="sm" />
                                                 {{ $match->homeTeam->name }}
                                             </span>
                                             <span class="font-display font-semibold">
@@ -33,7 +33,7 @@
                                             </span>
                                             <span class="flex items-center justify-end gap-2 text-white w-2/5 text-right">
                                                 {{ $match->awayTeam->name }}
-                                                <x-avatar :path="$match->awayTeam->logo_path" :name="$match->awayTeam->name" size="xs" />
+                                                <x-avatar :path="$match->awayTeam->logo_path" :name="$match->awayTeam->name" size="sm" />
                                             </span>
                                         </div>
                                         <div class="mt-1 flex items-center justify-between text-xs text-text-muted">

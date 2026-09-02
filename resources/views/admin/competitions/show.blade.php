@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <div class="flex items-center gap-4">
-                <x-avatar :path="$competition->logo_path" :name="$competition->name" size="lg" />
+                <x-avatar :path="$competition->logo_path" :name="$competition->name" size="xl" />
                 <div>
                     <h2 class="font-display font-bold text-xl text-white">{{ $competition->name }}</h2>
                     <p class="text-sm text-text-muted mt-1">Saison {{ $competition->season }} · <x-status-badge :status="$competition->status" /></p>

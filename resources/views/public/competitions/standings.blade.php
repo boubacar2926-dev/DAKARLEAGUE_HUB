@@ -34,7 +34,7 @@
                                         <td class="px-3 py-3 text-text-muted">{{ $row['rank'] }}</td>
                                         <td class="px-3 py-3 text-white font-medium">
                                             <a href="{{ route('public.competitions.team', [$competition, $row['team']]) }}" class="flex items-center gap-2 hover:text-primary">
-                                                <x-avatar :path="$row['team']->logo_path" :name="$row['team']->name" size="xs" />
+                                                <x-avatar :path="$row['team']->logo_path" :name="$row['team']->name" size="sm" />
                                                 {{ $row['team']->name }}
                                             </a>
                                         </td>

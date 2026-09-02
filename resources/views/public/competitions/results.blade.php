@@ -17,30 +17,58 @@
                         <div class="bg-surface border border-border rounded-lg p-4" x-data="{ open: false }">
                             <div class="flex items-center justify-between text-sm mb-2">
                                 <span class="flex items-center gap-2 text-white font-medium">
-                                    <x-avatar :path="$match->homeTeam->logo_path" :name="$match->homeTeam->name" size="xs" />
+                                    <x-avatar :path="$match->homeTeam->logo_path" :name="$match->homeTeam->name" size="md" />
                                     {{ $match->homeTeam->name }}
                                 </span>
                                 <span class="font-display font-bold text-primary text-lg">{{ $match->home_score }} - {{ $match->away_score }}</span>
                                 <span class="flex items-center gap-2 text-white font-medium">
                                     {{ $match->awayTeam->name }}
-                                    <x-avatar :path="$match->awayTeam->logo_path" :name="$match->awayTeam->name" size="xs" />
+                                    <x-avatar :path="$match->awayTeam->logo_path" :name="$match->awayTeam->name" size="md" />
                                 </span>
                             </div>
                             @if ($match->events->isNotEmpty())
-                                <div class="text-xs text-text-muted flex flex-wrap gap-x-4 gap-y-1 justify-center border-t border-border pt-2 mt-2">
-                                    @foreach ($match->events as $event)
-                                        <span>
-                                            @switch($event->type)
-                                                @case('but') ⚽ @break
-                                                @case('but_penalty') ⚽ (pen.) @break
-                                                @case('but_contre_son_camp') ⚽ (csc) @break
-                                                @case('carton_jaune') 🟨 @break
-                                                @case('carton_rouge') 🟥 @break
-                                            @endswitch
-                                            {{ $event->player?->fullName() ?? '' }}
-                                            @if($event->minute) {{ $event->minute }}' @endif
-                                        </span>
-                                    @endforeach
+                                @php
+                                    $eventsByTeam = $match->events->sortBy('minute');
+                                    $homeEvents = $eventsByTeam->where('team_id', $match->home_team_id)->values();
+                                    $awayEvents = $eventsByTeam->where('team_id', $match->away_team_id)->values();
+                                @endphp
+                                <div class="grid grid-cols-2 gap-4 text-xs text-text-muted border-t border-border pt-2 mt-2">
+                                    <div class="space-y-1.5">
+                                        @foreach ($homeEvents as $event)
+                                            <div class="flex items-center gap-2">
+                                                <x-avatar :path="$event->player?->photo_path" :name="$event->player?->fullName() ?? '?'" size="sm" />
+                                                <span>
+                                                    @switch($event->type)
+                                                        @case('but') ⚽ @break
+                                                        @case('but_penalty') ⚽ (pen.) @break
+                                                        @case('but_contre_son_camp') ⚽ (csc) @break
+                                                        @case('carton_jaune') 🟨 @break
+                                                        @case('carton_rouge') 🟥 @break
+                                                    @endswitch
+                                                    {{ $event->player?->fullName() ?? '' }}
+                                                    @if($event->minute) {{ $event->minute }}' @endif
+                                                </span>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                    <div class="space-y-1.5">
+                                        @foreach ($awayEvents as $event)
+                                            <div class="flex items-center justify-end gap-2 text-right">
+                                                <span>
+                                                    {{ $event->player?->fullName() ?? '' }}
+                                                    @if($event->minute) {{ $event->minute }}' @endif
+                                                    @switch($event->type)
+                                                        @case('but') ⚽ @break
+                                                        @case('but_penalty') ⚽ (pen.) @break
+                                                        @case('but_contre_son_camp') ⚽ (csc) @break
+                                                        @case('carton_jaune') 🟨 @break
+                                                        @case('carton_rouge') 🟥 @break
+                                                    @endswitch
+                                                </span>
+                                                <x-avatar :path="$event->player?->photo_path" :name="$event->player?->fullName() ?? '?'" size="sm" />
+                                            </div>
+                                        @endforeach
+                                    </div>
                                 </div>
                             @endif
 

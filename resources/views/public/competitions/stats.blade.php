@@ -41,7 +41,7 @@
                                         <td class="px-5 py-2 text-text-muted w-8">{{ $loop->iteration }}</td>
                                         <td class="px-2 py-2 text-white">
                                             <a href="{{ route('public.competitions.player', [$competition, $row['player']]) }}" class="flex items-center gap-2 hover:text-primary">
-                                                <x-avatar :path="$row['player']->photo_path" :name="$row['player']->fullName()" size="xs" />
+                                                <x-avatar :path="$row['player']->photo_path" :name="$row['player']->fullName()" size="sm" />
                                                 {{ $row['player']->fullName() }}
                                                 <span class="text-text-muted text-xs">({{ $row['player']->team->name }})</span>
                                             </a>
@@ -65,7 +65,7 @@
                                     <tr class="hover:bg-white/5">
                                         <td class="px-5 py-2 text-white">
                                             <a href="{{ route('public.competitions.player', [$competition, $row['player']]) }}" class="flex items-center gap-2 hover:text-primary">
-                                                <x-avatar :path="$row['player']->photo_path" :name="$row['player']->fullName()" size="xs" />
+                                                <x-avatar :path="$row['player']->photo_path" :name="$row['player']->fullName()" size="sm" />
                                                 {{ $row['player']->fullName() }}
                                                 <span class="text-text-muted text-xs">({{ $row['player']->team->name }})</span>
                                             </a>

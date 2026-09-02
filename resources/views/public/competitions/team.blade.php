@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center gap-4">
-            <x-avatar :path="$team->logo_path" :name="$team->name" size="lg" />
+            <x-avatar :path="$team->logo_path" :name="$team->name" size="xl" />
             <div>
                 <p class="text-xs text-text-muted"><a href="{{ route('public.competitions.standings', $competition) }}" class="hover:text-primary">&larr; {{ $competition->name }}</a></p>
                 <h2 class="font-display font-bold text-xl text-white">{{ $team->name }}</h2>

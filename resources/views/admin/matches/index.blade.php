@@ -39,7 +39,12 @@
                                 <tbody class="divide-y divide-border">
                                     @foreach ($roundMatches as $match)
                                         <tr class="hover:bg-white/5">
-                                            <td class="px-4 py-3 text-sm text-white w-1/3">{{ $match->homeTeam->name }}</td>
+                                            <td class="px-4 py-3 text-sm text-white w-1/3">
+                                                <div class="flex items-center gap-2">
+                                                    <x-avatar :path="$match->homeTeam->logo_path" :name="$match->homeTeam->name" size="sm" />
+                                                    {{ $match->homeTeam->name }}
+                                                </div>
+                                            </td>
                                             <td class="px-4 py-3 text-sm text-center font-display font-semibold">
                                                 @if ($match->status === 'termine')
                                                     <span class="text-primary">{{ $match->home_score }} - {{ $match->away_score }}</span>
@@ -47,7 +52,12 @@
                                                     <span class="text-text-muted">vs</span>
                                                 @endif
                                             </td>
-                                            <td class="px-4 py-3 text-sm text-white w-1/3">{{ $match->awayTeam->name }}</td>
+                                            <td class="px-4 py-3 text-sm text-white w-1/3">
+                                                <div class="flex items-center gap-2">
+                                                    <x-avatar :path="$match->awayTeam->logo_path" :name="$match->awayTeam->name" size="sm" />
+                                                    {{ $match->awayTeam->name }}
+                                                </div>
+                                            </td>
                                             <td class="px-4 py-3 text-sm text-text-muted whitespace-nowrap">
                                                 {{ $match->scheduled_at?->format('d/m/Y H:i') ?? 'Non planifié' }}
                                             </td>

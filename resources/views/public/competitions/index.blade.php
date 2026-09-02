@@ -18,7 +18,7 @@
                                 <span class="text-xs text-text-muted">{{ $competition->season }}</span>
                             </div>
                             <div class="flex items-center gap-3">
-                                <x-avatar :path="$competition->logo_path" :name="$competition->name" size="md" />
+                                <x-avatar :path="$competition->logo_path" :name="$competition->name" size="lg" />
                                 <div class="font-display font-semibold text-white text-lg">{{ $competition->name }}</div>
                             </div>
                             <p class="text-sm text-text-muted mt-1">{{ $competition->category }}</p>

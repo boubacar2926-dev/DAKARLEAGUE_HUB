@@ -1,4 +1,4 @@
-@props(['path' => null, 'name' => '', 'size' => 'md', 'shape' => 'circle'])
+@props(['path' => null, 'name' => '', 'size' => 'md'])
 
 @php
     $sizeClasses = match ($size) {
@@ -10,7 +10,7 @@
         default => 'w-10 h-10 text-sm',
     };
 
-    $shapeClass = $shape === 'square' ? 'rounded-md' : 'rounded-full';
+    $shapeClass = 'rounded-full';
 
     $initials = collect(preg_split('/\s+/', trim($name)))
         ->filter()

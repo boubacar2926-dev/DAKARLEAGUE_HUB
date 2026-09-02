@@ -36,7 +36,7 @@
                 <h3 class="font-display font-semibold text-white mb-4">Prochaines rencontres</h3>
                 @forelse ($upcomingMatches as $match)
                     <div class="flex items-center justify-between py-2 border-b border-border last:border-0 text-sm">
-                        <span class="text-white">{{ $match->homeTeam->name }} — {{ $match->awayTeam->name }}</span>
+                        <x-match-teams :match="$match" />
                         <span class="text-text-muted">{{ $match->scheduled_at?->format('d/m/Y H:i') ?? 'À confirmer' }}</span>
                     </div>
                 @empty

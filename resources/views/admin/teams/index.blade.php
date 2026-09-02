@@ -33,7 +33,7 @@
                                     <tr class="hover:bg-white/5">
                                         <td class="px-4 py-3 text-sm text-white font-medium">
                                             <div class="flex items-center gap-3">
-                                                <x-avatar :path="$team->logo_path" :name="$team->name" size="sm" />
+                                                <x-avatar :path="$team->logo_path" :name="$team->name" size="md" />
                                                 {{ $team->name }}
                                             </div>
                                         </td>
