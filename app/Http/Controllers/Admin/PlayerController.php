@@ -15,7 +15,10 @@ class PlayerController extends Controller
 {
     public function index(Team $team): View
     {
-        $this->authorize('view', $team->competition);
+        // Un responsable habilité à gérer son équipe (cf. TeamPolicy::update) doit pouvoir
+        // consulter son effectif — vérifier uniquement l'accès à la compétition (organisateur/
+        // admin) l'en empêchait à tort alors qu'il peut par ailleurs créer/modifier ses joueurs.
+        $this->authorize('update', $team);
 
         $players = $team->players()->orderBy('jersey_number')->get();
 

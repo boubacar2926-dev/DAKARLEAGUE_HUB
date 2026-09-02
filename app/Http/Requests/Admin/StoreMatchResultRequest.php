@@ -41,7 +41,7 @@ class StoreMatchResultRequest extends FormRequest
                 MatchEvent::TYPE_YELLOW_CARD,
                 MatchEvent::TYPE_RED_CARD,
             ])],
-            'events.*.minute' => ['nullable', 'integer', 'min:0', 'max:130'],
+            'events.*.minute' => ['required', 'integer', 'min:1', 'max:90'],
         ];
     }
 

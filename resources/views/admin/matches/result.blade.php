@@ -83,7 +83,7 @@
                                         <option value="carton_rouge">🟥 Carton rouge</option>
                                     </select>
 
-                                    <input :name="'events['+index+'][minute]'" x-model.number="event.minute" type="number" min="0" max="130" placeholder="Min." class="col-span-1 bg-surface border-border text-white text-sm rounded-md focus:border-primary focus:ring-primary">
+                                    <input :name="'events['+index+'][minute]'" x-model.number="event.minute" type="number" min="1" max="90" placeholder="Min." required class="col-span-1 bg-surface border-border text-white text-sm rounded-md focus:border-primary focus:ring-primary">
 
                                     <button type="button" @click="removeEvent(index)" class="col-span-1 text-danger hover:underline text-sm text-center">✕</button>
                                 </div>
@@ -115,8 +115,8 @@
                 homePlayers: config.homePlayers,
                 awayPlayers: config.awayPlayers,
                 events: config.events.length ? config.events : [],
-                homeScoreDisplay: {{ old('home_score', $match->home_score ?? 0) }},
-                awayScoreDisplay: {{ old('away_score', $match->away_score ?? 0) }},
+                homeScoreDisplay: @js((int) old('home_score', $match->home_score ?? 0)),
+                awayScoreDisplay: @js((int) old('away_score', $match->away_score ?? 0)),
                 get homeGoalsFromEvents() {
                     return this.events.filter(e => ['but', 'but_penalty'].includes(e.type) && e.team_id == this.homeTeamId).length
                         + this.events.filter(e => e.type === 'but_contre_son_camp' && e.team_id == this.awayTeamId).length;

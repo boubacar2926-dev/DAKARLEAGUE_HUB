@@ -6,7 +6,7 @@
     <div class="py-8">
         <div class="max-w-2xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-surface border border-border rounded-lg p-6">
-                <form method="POST" action="{{ route('admin.matches.update', $match) }}" class="space-y-6">
+                <form id="match-edit-form" method="POST" action="{{ route('admin.matches.update', $match) }}" class="space-y-6">
                     @csrf
                     @method('PUT')
 
@@ -50,18 +50,19 @@
                         <x-input-error :messages="$errors->get('cancellation_reason')" class="mt-2" />
                     </div>
 
-                    <div class="flex items-center justify-between">
-                        <form action="{{ route('admin.matches.destroy', $match) }}" method="POST" onsubmit="return confirm('Supprimer ce match ?');">
-                            @csrf @method('DELETE')
-                            <button type="submit" class="text-sm text-danger hover:underline">Supprimer le match</button>
-                        </form>
-
-                        <div class="flex gap-3">
-                            <a href="{{ route('admin.competitions.matches.index', $match->competition_id) }}" class="px-4 py-2 text-sm text-text-muted hover:text-white">Annuler</a>
-                            <x-primary-button>Enregistrer</x-primary-button>
-                        </div>
-                    </div>
                 </form>
+
+                <div class="flex items-center justify-between mt-6">
+                    <form action="{{ route('admin.matches.destroy', $match) }}" method="POST" onsubmit="return confirm('Supprimer ce match ?');">
+                        @csrf @method('DELETE')
+                        <button type="submit" class="text-sm text-danger hover:underline">Supprimer le match</button>
+                    </form>
+
+                    <div class="flex gap-3">
+                        <a href="{{ route('admin.competitions.matches.index', $match->competition_id) }}" class="px-4 py-2 text-sm text-text-muted hover:text-white">Annuler</a>
+                        <x-primary-button form="match-edit-form">Enregistrer</x-primary-button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

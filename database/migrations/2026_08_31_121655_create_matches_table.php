@@ -31,7 +31,11 @@ return new class extends Migration
         });
 
         // RG04 : un match oppose deux équipes distinctes.
-        DB::statement('ALTER TABLE `matches` ADD CONSTRAINT chk_matches_distinct_teams CHECK (home_team_id <> away_team_id)');
+        // ALTER TABLE ... ADD CONSTRAINT CHECK n'est pas supporté par SQLite (utilisé en tests) ;
+        // on ne l'applique donc que sur le driver de production (MySQL).
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement('ALTER TABLE `matches` ADD CONSTRAINT chk_matches_distinct_teams CHECK (home_team_id <> away_team_id)');
+        }
     }
 
     public function down(): void

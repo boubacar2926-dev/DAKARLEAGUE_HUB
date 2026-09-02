@@ -112,6 +112,15 @@ class MatchController extends Controller
     {
         $this->authorize('update', $match);
 
+        // Un match déjà validé (résultat saisi, cf. MatchResultController) ne doit plus pouvoir
+        // être reprogrammé/reporté/annulé ici : cela le ferait disparaître du classement
+        // (StandingsService ne compte que les matchs status=termine) sans purger le score ni
+        // l'événement de validation, ce qui corrompt les données. destroy() applique déjà cette
+        // règle pour la suppression, update() doit faire de même.
+        if ($match->isFinished()) {
+            return back()->with('error', "Impossible de modifier un match dont le résultat a déjà été validé.");
+        }
+
         $validated = $request->validate([
             'scheduled_at' => ['nullable', 'date'],
             'venue' => ['nullable', 'string', 'max:150'],

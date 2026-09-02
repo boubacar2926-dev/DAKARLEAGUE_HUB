@@ -9,6 +9,7 @@ use App\Models\Competition;
 use App\Models\Team;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class TeamRegistrationController extends Controller
@@ -17,9 +18,14 @@ class TeamRegistrationController extends Controller
      * Inscription en ligne d'une équipe (fonctionnalité secondaire, §1.4) —
      * l'organisateur devra ensuite la valider (§2.1 : "Organisateur ... valide les équipes").
      */
-    public function create(Competition $competition): View
+    public function create(Request $request, Competition $competition): View|RedirectResponse
     {
         $this->authorizeRegistration($competition);
+
+        if ($this->hasExistingRegistration($competition, $request->user())) {
+            return redirect()->route('public.competitions.show', $competition)
+                ->with('status', "Vous avez déjà inscrit une équipe dans cette compétition.");
+        }
 
         return view('public.competitions.register-team', compact('competition'));
     }
@@ -29,6 +35,13 @@ class TeamRegistrationController extends Controller
         $this->authorizeRegistration($competition);
 
         $user = $request->user();
+
+        // Empêche un même responsable d'inscrire plusieurs équipes dans la même compétition
+        // (double inscription en soumettant le formulaire plusieurs fois avec des noms différents).
+        if ($this->hasExistingRegistration($competition, $user)) {
+            return redirect()->route('public.competitions.show', $competition)
+                ->with('status', "Vous avez déjà inscrit une équipe dans cette compétition.");
+        }
 
         $team = Team::create($request->validated() + [
             'competition_id' => $competition->id,
@@ -53,5 +66,10 @@ class TeamRegistrationController extends Controller
     private function authorizeRegistration(Competition $competition): void
     {
         abort_unless($competition->status === Competition::STATUS_REGISTRATION_OPEN, 404);
+    }
+
+    private function hasExistingRegistration(Competition $competition, User $user): bool
+    {
+        return $competition->teams()->where('manager_user_id', $user->id)->exists();
     }
 }

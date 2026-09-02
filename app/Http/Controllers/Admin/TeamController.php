@@ -86,6 +86,12 @@ class TeamController extends Controller
     {
         $this->authorizeCompetitionManager($team->competition);
 
+        // Évite une double validation (ré-approbation d'une équipe déjà validée), qui produirait
+        // sinon une entrée de journal d'activité redondante/trompeuse pour la même action.
+        if ($team->registration_status === Team::REGISTRATION_APPROVED) {
+            return back()->with('status', "Équipe « {$team->name} » déjà validée.");
+        }
+
         $team->update(['registration_status' => Team::REGISTRATION_APPROVED]);
 
         ActivityLog::record('team.approved', $team, "Inscription validée pour « {$team->name} »", competitionId: $team->competition_id);
@@ -96,6 +102,10 @@ class TeamController extends Controller
     public function reject(Team $team): RedirectResponse
     {
         $this->authorizeCompetitionManager($team->competition);
+
+        if ($team->registration_status === Team::REGISTRATION_REJECTED) {
+            return back()->with('status', "Inscription de « {$team->name} » déjà refusée.");
+        }
 
         $team->update(['registration_status' => Team::REGISTRATION_REJECTED]);
 

@@ -29,6 +29,13 @@ class MatchResultController extends Controller
     {
         $this->authorize('validateResult', $match);
 
+        // Un match reporté ou annulé n'a pas été joué : y saisir un score le ferait basculer en
+        // "terminé" (et donc entrer dans le classement via StandingsService) alors qu'il n'a pas
+        // eu lieu, contredisant sa reprogrammation/annulation.
+        if (in_array($match->status, [GameMatch::STATUS_CANCELLED, GameMatch::STATUS_POSTPONED], true)) {
+            return back()->with('error', "Impossible de saisir un résultat pour un match reporté ou annulé.");
+        }
+
         $validated = $request->validated();
 
         DB::transaction(function () use ($match, $validated) {

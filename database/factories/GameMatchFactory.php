@@ -17,9 +17,13 @@ class GameMatchFactory extends Factory
     public function definition(): array
     {
         return [
+            // home_team_id / away_team_id sont rattachées explicitement à la même compétition
+            // que le match : sans cela, Team::factory() créait chacune sa propre compétition
+            // via sa propre factory imbriquée, produisant un match dont les deux équipes
+            // n'appartiennent ni à la compétition du match ni à la même compétition entre elles.
             'competition_id' => Competition::factory(),
-            'home_team_id' => Team::factory(),
-            'away_team_id' => Team::factory(),
+            'home_team_id' => fn (array $attributes) => Team::factory()->create(['competition_id' => $attributes['competition_id']])->id,
+            'away_team_id' => fn (array $attributes) => Team::factory()->create(['competition_id' => $attributes['competition_id']])->id,
             'round' => fake()->numberBetween(1, 10),
             'scheduled_at' => fake()->dateTimeBetween('-1 month', '+1 month'),
             'venue' => 'Stade '.fake()->city(),
