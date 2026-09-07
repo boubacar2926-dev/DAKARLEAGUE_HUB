@@ -26,6 +26,7 @@
                                     <th class="px-4 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">#</th>
                                     <th class="px-4 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Nom</th>
                                     <th class="px-4 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Poste</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">Âge</th>
                                     <th class="px-4 py-3"></th>
                                 </tr>
                             </thead>
@@ -39,7 +40,8 @@
                                                 {{ $player->fullName() }}
                                             </div>
                                         </td>
-                                        <td class="px-4 py-3 text-sm text-text-muted capitalize">{{ $player->position ?? '—' }}</td>
+                                        <td class="px-4 py-3 text-sm text-text-muted">{{ $player->positionLabel() ?? '—' }}</td>
+                                        <td class="px-4 py-3 text-sm text-text-muted">{{ $player->age() !== null ? $player->age().' ans' : '—' }}</td>
                                         <td class="px-4 py-3 text-sm text-right space-x-3">
                                             @can('update', $player)
                                                 <a href="{{ route('admin.players.edit', $player) }}" class="text-text-muted hover:text-white">Modifier</a>

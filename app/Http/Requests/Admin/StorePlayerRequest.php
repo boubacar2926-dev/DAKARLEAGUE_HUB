@@ -5,6 +5,7 @@ namespace App\Http\Requests\Admin;
 use App\Models\Player;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Validator;
 
 class StorePlayerRequest extends FormRequest
 {
@@ -35,7 +36,7 @@ class StorePlayerRequest extends FormRequest
             'first_name' => ['required', 'string', 'max:100'],
             'last_name' => ['required', 'string', 'max:100'],
             'birth_date' => ['nullable', 'date', 'before:today'],
-            'position' => ['nullable', Rule::in([
+            'position' => ['required', Rule::in([
                 Player::POSITION_GOALKEEPER,
                 Player::POSITION_DEFENDER,
                 Player::POSITION_MIDFIELDER,
@@ -57,8 +58,30 @@ class StorePlayerRequest extends FormRequest
         return [
             'first_name.required' => "Le prénom est obligatoire.",
             'last_name.required' => "Le nom est obligatoire.",
+            'position.required' => "Le poste est obligatoire (nécessaire pour vérifier qu'une composition aligne bien un gardien).",
             'jersey_number.unique' => "Ce numéro de maillot est déjà attribué dans cette équipe.",
             'birth_date.before' => "La date de naissance doit être antérieure à aujourd'hui.",
         ];
+    }
+
+    /**
+     * Plafonne l'effectif d'une équipe (Player::MAX_ROSTER_SIZE) : uniquement vérifié à la
+     * création d'un nouveau joueur, jamais en modification d'un joueur déjà dans l'effectif.
+     */
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(function (Validator $validator) {
+            $player = $this->route('player');
+
+            if ($player) {
+                return;
+            }
+
+            $team = $this->route('team');
+
+            if ($team && $team->players()->count() >= Player::MAX_ROSTER_SIZE) {
+                $validator->errors()->add('first_name', "L'effectif de cette équipe a atteint la limite de ".Player::MAX_ROSTER_SIZE.' joueurs.');
+            }
+        });
     }
 }

@@ -29,6 +29,8 @@ class StoreMatchResultRequest extends FormRequest
         return [
             'home_score' => ['required', 'integer', 'min:0', 'max:50'],
             'away_score' => ['required', 'integer', 'min:0', 'max:50'],
+            'home_penalties' => ['nullable', 'integer', 'min:0', 'max:30'],
+            'away_penalties' => ['nullable', 'integer', 'min:0', 'max:30'],
             'events' => ['array'],
             // Un évènement ne peut concerner qu'une des deux équipes qui disputent CE match
             // (empêche l'injection d'un but/carton pour une équipe d'une autre compétition).
@@ -56,7 +58,9 @@ class StoreMatchResultRequest extends FormRequest
             $events = collect($this->input('events', []));
 
             $this->assertPlayersBelongToDeclaredTeam($validator, $match, $events);
+            $this->assertPlayersWereConvokedForThisMatch($validator, $match, $events);
             $this->assertYellowCardCapRespected($validator, $events);
+            $this->assertKnockoutDrawHasPenaltyShootoutWinner($validator, $match);
 
             $homeGoals = $events->filter(fn ($e) => in_array($e['type'], [MatchEvent::TYPE_GOAL, MatchEvent::TYPE_PENALTY_GOAL])
                     && (int) $e['team_id'] === $match->home_team_id)
@@ -108,6 +112,70 @@ class StoreMatchResultRequest extends FormRequest
             if ($playerTeamId === null || (int) $playerTeamId !== (int) $event['team_id']) {
                 $validator->errors()->add("events.{$index}.player_id", "Ce joueur n'appartient pas à l'équipe indiquée pour cet évènement.");
             }
+        }
+    }
+
+    /**
+     * Un but ou un carton ne peut être attribué qu'à un joueur convoqué pour CE match (titulaire
+     * ou remplaçant) — sinon le travail de convocation/composition n'aurait aucune portée réelle.
+     * Rétrocompatibilité : les matchs sans aucune composition enregistrée (données antérieures à
+     * cette règle) ne sont pas bloqués, faute de quoi leurs résultats ne pourraient plus être corrigés.
+     */
+    private function assertPlayersWereConvokedForThisMatch(Validator $validator, $match, $events): void
+    {
+        $playerIds = $events->pluck('player_id')->filter()->unique();
+
+        if ($playerIds->isEmpty()) {
+            return;
+        }
+
+        $match->loadMissing('lineups');
+        $convokedIds = $match->lineups->pluck('player_id')->all();
+
+        if (empty($convokedIds)) {
+            return;
+        }
+
+        foreach ($events as $index => $event) {
+            $playerId = $event['player_id'] ?? null;
+
+            if (! $playerId || in_array((int) $playerId, $convokedIds, true)) {
+                continue;
+            }
+
+            $player = Player::find($playerId);
+            $validator->errors()->add("events.{$index}.player_id", "Ce joueur n'a pas été convoqué pour ce match".($player ? " ({$player->fullName()})" : '').'.');
+        }
+    }
+
+    /**
+     * Un tableau à élimination directe a besoin d'un vainqueur pour progresser au tour suivant :
+     * un match terminé sur un score nul doit être départagé par une séance de tirs au but.
+     */
+    private function assertKnockoutDrawHasPenaltyShootoutWinner(Validator $validator, $match): void
+    {
+        if ($match->competition->format !== \App\Models\Competition::FORMAT_KNOCKOUT) {
+            return;
+        }
+
+        $homeScore = (int) $this->input('home_score');
+        $awayScore = (int) $this->input('away_score');
+
+        if ($homeScore !== $awayScore) {
+            return;
+        }
+
+        $homePenalties = $this->input('home_penalties');
+        $awayPenalties = $this->input('away_penalties');
+
+        if ($homePenalties === null || $homePenalties === '' || $awayPenalties === null || $awayPenalties === '') {
+            $validator->errors()->add('home_penalties', "Ce match à élimination directe est terminé sur un score nul : indiquez le résultat de la séance de tirs au but pour désigner un vainqueur.");
+
+            return;
+        }
+
+        if ((int) $homePenalties === (int) $awayPenalties) {
+            $validator->errors()->add('home_penalties', "Une séance de tirs au but ne peut pas se terminer sur une égalité.");
         }
     }
 

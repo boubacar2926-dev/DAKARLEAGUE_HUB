@@ -19,6 +19,13 @@ class Player extends Model
 
     public const POSITION_FORWARD = 'attaquant';
 
+    /**
+     * Plafond d'effectif par équipe et par compétition — usage courant en championnat amateur
+     * pour éviter les listes de joueurs disproportionnées (aucune exigence du cahier des charges,
+     * mais une taille illimitée n'a pas de sens administratif).
+     */
+    public const MAX_ROSTER_SIZE = 30;
+
     protected $fillable = [
         'team_id',
         'competition_id',
@@ -63,5 +70,35 @@ class Player extends Model
     public function fullName(): string
     {
         return trim("{$this->first_name} {$this->last_name}");
+    }
+
+    public function positionLabel(): ?string
+    {
+        return match ($this->position) {
+            self::POSITION_GOALKEEPER => 'Gardien',
+            self::POSITION_DEFENDER => 'Défenseur',
+            self::POSITION_MIDFIELDER => 'Milieu',
+            self::POSITION_FORWARD => 'Attaquant',
+            default => null,
+        };
+    }
+
+    /**
+     * Ordre d'affichage "feuille de match" (gardien puis défenseurs, milieux, attaquants).
+     */
+    public function positionOrder(): int
+    {
+        return match ($this->position) {
+            self::POSITION_GOALKEEPER => 0,
+            self::POSITION_DEFENDER => 1,
+            self::POSITION_MIDFIELDER => 2,
+            self::POSITION_FORWARD => 3,
+            default => 4,
+        };
+    }
+
+    public function age(): ?int
+    {
+        return $this->birth_date?->age;
     }
 }

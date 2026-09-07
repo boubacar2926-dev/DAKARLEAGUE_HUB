@@ -11,9 +11,10 @@
                     awayTeamId: {{ $match->away_team_id }},
                     homeTeamName: @js($match->homeTeam->name),
                     awayTeamName: @js($match->awayTeam->name),
-                    homePlayers: @js($match->homeTeam->players->map->only(['id', 'first_name', 'last_name'])),
-                    awayPlayers: @js($match->awayTeam->players->map->only(['id', 'first_name', 'last_name'])),
+                    homePlayers: @js($homePlayers->map->only(['id', 'first_name', 'last_name'])),
+                    awayPlayers: @js($awayPlayers->map->only(['id', 'first_name', 'last_name'])),
                     events: @js($match->events->map->only(['team_id', 'player_id', 'type', 'minute'])),
+                    isKnockout: {{ $match->competition->isKnockoutFormat() ? 'true' : 'false' }},
                 })">
                 <form method="POST" action="{{ route('admin.matches.result.update', $match) }}" class="space-y-8">
                     @csrf
@@ -34,6 +35,21 @@
 
                     <x-input-error :messages="$errors->get('home_score')" />
                     <x-input-error :messages="$errors->get('away_score')" />
+
+                    <div x-show="isKnockout && homeScoreDisplay === awayScoreDisplay" x-cloak class="bg-background border border-border rounded-lg p-4">
+                        <p class="text-sm text-white mb-3">Score nul en élimination directe : séance de tirs au but pour désigner le vainqueur.</p>
+                        <div class="grid grid-cols-2 gap-6 items-end">
+                            <div>
+                                <x-input-label value="Tirs au but — {{ $match->homeTeam->name }}" />
+                                <x-text-input name="home_penalties" type="number" min="0" class="mt-1 block w-full text-center text-xl font-display font-bold" value="{{ old('home_penalties', $match->home_penalties) }}" />
+                            </div>
+                            <div>
+                                <x-input-label value="Tirs au but — {{ $match->awayTeam->name }}" />
+                                <x-text-input name="away_penalties" type="number" min="0" class="mt-1 block w-full text-center text-xl font-display font-bold" value="{{ old('away_penalties', $match->away_penalties) }}" />
+                            </div>
+                        </div>
+                        <x-input-error :messages="$errors->get('home_penalties')" class="mt-2" />
+                    </div>
 
                     <div>
                         <div class="flex items-center justify-between mb-3">
@@ -114,6 +130,7 @@
                 awayTeamName: config.awayTeamName,
                 homePlayers: config.homePlayers,
                 awayPlayers: config.awayPlayers,
+                isKnockout: config.isKnockout,
                 events: config.events.length ? config.events : [],
                 homeScoreDisplay: @js((int) old('home_score', $match->home_score ?? 0)),
                 awayScoreDisplay: @js((int) old('away_score', $match->away_score ?? 0)),

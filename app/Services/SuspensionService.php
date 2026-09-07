@@ -110,11 +110,22 @@ class SuspensionService
         $suspensionQueue = 0;
         $yellowCounter = 0;
         $reason = null;
+        $lastRound = null;
 
         foreach ($priorMatches as $priorMatch) {
             if ($suspensionQueue > 0) {
                 $suspensionQueue--;
             }
+
+            // Élimination directe : l'avertissement ne se cumule qu'à l'intérieur d'un même tour
+            // (pratique courante, ex. Ligue des Champions) — un jaune pris au tour précédent ne
+            // doit pas peser sur le tour suivant. Les suspensions déjà en cours (rouge/expulsion,
+            // $suspensionQueue) continuent en revanche de s'appliquer normalement d'un tour à l'autre.
+            if ($competition->isKnockoutFormat() && $lastRound !== null && $priorMatch->round !== $lastRound) {
+                $yellowCounter = 0;
+            }
+
+            $lastRound = $priorMatch->round;
 
             $matchEvents = $playerEvents->where('match_id', $priorMatch->id);
             $yellows = $matchEvents->where('type', MatchEvent::TYPE_YELLOW_CARD)->count();

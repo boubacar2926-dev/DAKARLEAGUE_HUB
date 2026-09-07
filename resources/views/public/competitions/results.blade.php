@@ -72,7 +72,7 @@
                                 </div>
                             @endif
 
-                            @if ($match->lineups->isNotEmpty())
+                            @if ($match->lineups->where('is_starting', true)->isNotEmpty())
                                 <div class="text-center mt-2 pt-2 border-t border-border">
                                     <button type="button" @click="open = !open" class="text-xs text-primary hover:underline">
                                         <span x-show="!open">Voir la composition</span>
