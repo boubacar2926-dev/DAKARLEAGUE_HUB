@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-display font-bold text-xl text-white">{{ $match->homeTeam->name }} — {{ $match->awayTeam->name }}</h2>
+        <h2 class="font-display font-bold text-xl text-white">{{ $match->homeTeam->name }} — {{ $match->awayTeam->name ?? 'Exempté' }}</h2>
     </x-slot>
 
     <div class="py-8">

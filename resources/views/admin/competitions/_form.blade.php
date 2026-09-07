@@ -33,9 +33,9 @@
         <x-input-error :messages="$errors->get('end_date')" class="mt-2" />
     </div>
 
-    <div>
+    <div x-data="{ format: '{{ $old('format', 'aller_simple') }}' }">
         <x-input-label for="format" value="Format" />
-        <select id="format" name="format" class="mt-1 block w-full bg-background border-border text-white rounded-md shadow-sm focus:border-primary focus:ring-primary">
+        <select id="format" name="format" x-model="format" class="mt-1 block w-full bg-background border-border text-white rounded-md shadow-sm focus:border-primary focus:ring-primary">
             @foreach ([
                 'aller_simple' => 'Championnat aller simple',
                 'aller_retour' => 'Championnat aller-retour',
@@ -46,6 +46,18 @@
             @endforeach
         </select>
         <x-input-error :messages="$errors->get('format')" class="mt-2" />
+
+        <template x-if="format === 'poules'">
+            <div class="mt-3">
+                <x-input-label for="number_of_groups" value="Nombre de poules" />
+                <x-text-input id="number_of_groups" name="number_of_groups" type="number" min="2" max="8" class="mt-1 block w-full" value="{{ $old('number_of_groups', 2) }}" />
+                <p class="text-xs text-text-muted mt-1">Les équipes sont réparties par tirage au sort au moment de la génération du calendrier.</p>
+                <x-input-error :messages="$errors->get('number_of_groups')" class="mt-2" />
+            </div>
+        </template>
+        <template x-if="format === 'elimination_directe'">
+            <p class="text-xs text-text-muted mt-3">Le nombre d'équipes validées devra être une puissance de 2 (2, 4, 8, 16…) au moment du tirage au sort.</p>
+        </template>
     </div>
 
     <div>
