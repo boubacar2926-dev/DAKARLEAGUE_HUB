@@ -30,7 +30,18 @@ class MatchController extends Controller
             ->get()
             ->groupBy('round');
 
-        return view('admin.matches.index', compact('competition', 'matches'));
+        // Le tour suivant d'un tableau à élimination directe ne peut être généré que si le tour
+        // en cours (le plus récent) est entièrement joué et comporte plus d'un match (sinon
+        // c'est déjà la finale).
+        $canGenerateNextRound = false;
+
+        if ($competition->isKnockoutFormat() && $matches->isNotEmpty()) {
+            $lastRound = $matches->last();
+            $canGenerateNextRound = $lastRound->count() > 1
+                && $lastRound->every(fn (GameMatch $match) => $match->status === GameMatch::STATUS_FINISHED);
+        }
+
+        return view('admin.matches.index', compact('competition', 'matches', 'canGenerateNextRound'));
     }
 
     public function create(Competition $competition): View
@@ -97,6 +108,26 @@ class MatchController extends Controller
 
         return redirect()->route('admin.competitions.matches.index', $competition)
             ->with('status', "Calendrier généré : {$count} matchs créés.");
+    }
+
+    /**
+     * Fait progresser un tableau à élimination directe une fois tous les matchs du tour
+     * en cours terminés : apparie les vainqueurs pour créer le tour suivant.
+     */
+    public function generateNextRound(Competition $competition): RedirectResponse
+    {
+        $this->authorize('manageMatches', $competition);
+
+        try {
+            $count = $this->calendarService->generateNextKnockoutRound($competition);
+        } catch (\InvalidArgumentException $e) {
+            return back()->with('error', $e->getMessage());
+        }
+
+        ActivityLog::record('calendar.generated', $competition, "Génération du tour suivant ({$count} matchs)", competitionId: $competition->id);
+
+        return redirect()->route('admin.competitions.matches.index', $competition)
+            ->with('status', "Tour suivant généré : {$count} match(s) créé(s).");
     }
 
     public function edit(GameMatch $match): View

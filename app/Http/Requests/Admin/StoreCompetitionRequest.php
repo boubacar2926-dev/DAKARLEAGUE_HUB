@@ -35,6 +35,8 @@ class StoreCompetitionRequest extends FormRequest
                 Competition::FORMAT_GROUPS,
                 Competition::FORMAT_KNOCKOUT,
             ])],
+            // Nombre de poules : uniquement pertinent (et requis) pour le format "poules".
+            'number_of_groups' => ['required_if:format,'.Competition::FORMAT_GROUPS, 'nullable', 'integer', 'min:2', 'max:8'],
             'status' => ['required', Rule::in([
                 Competition::STATUS_DRAFT,
                 Competition::STATUS_REGISTRATION_OPEN,
@@ -58,6 +60,8 @@ class StoreCompetitionRequest extends FormRequest
             'season.required' => "La saison est obligatoire.",
             'format.required' => "Le format est obligatoire.",
             'end_date.after_or_equal' => "La date de fin doit être postérieure ou égale à la date de début.",
+            'number_of_groups.required_if' => "Indiquez le nombre de poules souhaité.",
+            'number_of_groups.min' => "Il faut au moins 2 poules.",
         ];
     }
 }

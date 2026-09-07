@@ -13,6 +13,13 @@
                             Générer le calendrier
                         </button>
                     </form>
+                @elseif ($competition->isKnockoutFormat() && $canGenerateNextRound)
+                    <form action="{{ route('admin.competitions.matches.generate-next-round', $competition) }}" method="POST">
+                        @csrf
+                        <button type="submit" class="inline-flex items-center px-4 py-2 bg-primary text-black text-xs font-semibold uppercase tracking-widest rounded-md hover:bg-primary-dark">
+                            Générer le tour suivant
+                        </button>
+                    </form>
                 @endif
                 <a href="{{ route('admin.competitions.matches.create', $competition) }}" class="inline-flex items-center px-4 py-2 border border-border text-white text-xs font-semibold uppercase tracking-widest rounded-md hover:border-primary">
                     + Ajouter un match
@@ -33,7 +40,13 @@
             @else
                 @foreach ($matches as $round => $roundMatches)
                     <div>
-                        <h3 class="font-display font-semibold text-white mb-3">Journée {{ $round }}</h3>
+                        <h3 class="font-display font-semibold text-white mb-3">
+                            @if ($competition->isKnockoutFormat())
+                                {{ \App\Models\Competition::knockoutRoundLabel($roundMatches->count()) }}
+                            @else
+                                Journée {{ $round }}
+                            @endif
+                        </h3>
                         <div class="bg-surface border border-border rounded-lg overflow-hidden">
                             <table class="min-w-full divide-y divide-border">
                                 <tbody class="divide-y divide-border">
@@ -41,35 +54,49 @@
                                         <tr class="hover:bg-white/5">
                                             <td class="px-4 py-3 text-sm text-white w-1/3">
                                                 <div class="flex items-center gap-2">
+                                                    @if ($competition->isGroupsFormat() && $match->homeTeam->group_label)
+                                                        <span class="text-[10px] font-semibold text-text-muted border border-border rounded px-1.5 py-0.5">Poule {{ $match->homeTeam->group_label }}</span>
+                                                    @endif
                                                     <x-avatar :path="$match->homeTeam->logo_path" :name="$match->homeTeam->name" size="sm" />
                                                     {{ $match->homeTeam->name }}
                                                 </div>
                                             </td>
                                             <td class="px-4 py-3 text-sm text-center font-display font-semibold">
-                                                @if ($match->status === 'termine')
+                                                @if ($match->isBye())
+                                                    <span class="text-text-muted text-xs uppercase">Exempté</span>
+                                                @elseif ($match->status === 'termine')
                                                     <span class="text-primary">{{ $match->home_score }} - {{ $match->away_score }}</span>
                                                 @else
                                                     <span class="text-text-muted">vs</span>
                                                 @endif
                                             </td>
                                             <td class="px-4 py-3 text-sm text-white w-1/3">
-                                                <div class="flex items-center gap-2">
-                                                    <x-avatar :path="$match->awayTeam->logo_path" :name="$match->awayTeam->name" size="sm" />
-                                                    {{ $match->awayTeam->name }}
-                                                </div>
+                                                @if ($match->isBye())
+                                                    <span class="text-text-muted italic">— qualifié d'office —</span>
+                                                @else
+                                                    <div class="flex items-center gap-2">
+                                                        <x-avatar :path="$match->awayTeam->logo_path" :name="$match->awayTeam->name" size="sm" />
+                                                        {{ $match->awayTeam->name }}
+                                                    </div>
+                                                @endif
                                             </td>
                                             <td class="px-4 py-3 text-sm text-text-muted whitespace-nowrap">
                                                 {{ $match->scheduled_at?->format('d/m/Y H:i') ?? 'Non planifié' }}
                                             </td>
                                             <td class="px-4 py-3 text-sm"><x-status-badge :status="$match->status" /></td>
                                             <td class="px-4 py-3 text-sm text-right space-x-3 whitespace-nowrap">
-                                                @if ($match->status !== 'termine')
-                                                    <a href="{{ route('admin.matches.result.edit', $match) }}" class="text-primary hover:underline">Saisir résultat</a>
+                                                @if ($match->isBye())
+                                                    <span class="text-text-muted">—</span>
                                                 @else
-                                                    <a href="{{ route('admin.matches.result.edit', $match) }}" class="text-text-muted hover:text-white">Modifier résultat</a>
+                                                    @if ($match->status !== 'termine')
+                                                        <a href="{{ route('admin.matches.result.edit', $match) }}" class="text-primary hover:underline">Saisir résultat</a>
+                                                    @else
+                                                        <a href="{{ route('admin.matches.result.edit', $match) }}" class="text-text-muted hover:text-white">Modifier résultat</a>
+                                                    @endif
+                                                    <a href="{{ route('admin.matches.convocation.edit', $match) }}" class="text-text-muted hover:text-white">Convocation</a>
+                                                    <a href="{{ route('admin.matches.lineup.edit', $match) }}" class="text-text-muted hover:text-white">Composition</a>
+                                                    <a href="{{ route('admin.matches.edit', $match) }}" class="text-text-muted hover:text-white">Modifier</a>
                                                 @endif
-                                                <a href="{{ route('admin.matches.lineup.edit', $match) }}" class="text-text-muted hover:text-white">Composition</a>
-                                                <a href="{{ route('admin.matches.edit', $match) }}" class="text-text-muted hover:text-white">Modifier</a>
                                             </td>
                                         </tr>
                                     @endforeach

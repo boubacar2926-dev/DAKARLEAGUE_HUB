@@ -40,6 +40,7 @@ class CompetitionController extends Controller
         $lastResults = $competition->matches()
             ->with(['homeTeam', 'awayTeam'])
             ->where('status', GameMatch::STATUS_FINISHED)
+            ->whereNotNull('away_team_id') // exclut les "exemptés" (bye) : pas un résultat joué
             ->orderByDesc('validated_at')
             ->limit(5)
             ->get();
@@ -50,6 +51,23 @@ class CompetitionController extends Controller
     public function standings(Competition $competition, StandingsService $standingsService): View
     {
         $this->abortIfNotPublished($competition);
+
+        if ($competition->isKnockoutFormat()) {
+            $bracket = $competition->matches()
+                ->with(['homeTeam', 'awayTeam'])
+                ->orderBy('round')
+                ->orderBy('id')
+                ->get()
+                ->groupBy('round');
+
+            return view('public.competitions.bracket', compact('competition', 'bracket'));
+        }
+
+        if ($competition->isGroupsFormat()) {
+            $standingsByGroup = $standingsService->calculateByGroup($competition);
+
+            return view('public.competitions.standings-groups', compact('competition', 'standingsByGroup'));
+        }
 
         $standings = $standingsService->calculate($competition);
 
@@ -94,6 +112,7 @@ class CompetitionController extends Controller
             ->whereHas('homeTeam', fn ($q) => $q->approved())
             ->whereHas('awayTeam', fn ($q) => $q->approved())
             ->where('status', GameMatch::STATUS_FINISHED)
+            ->whereNotNull('away_team_id') // exclut les "exemptés" (bye) : pas un résultat joué
             ->orderByDesc('validated_at')
             ->paginate(15);
 

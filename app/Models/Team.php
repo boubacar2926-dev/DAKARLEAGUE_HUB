@@ -30,6 +30,7 @@ class Team extends Model
         'contact_phone',
         'contact_email',
         'registration_status',
+        'group_label',
     ];
 
     public function competition(): BelongsTo

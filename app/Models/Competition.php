@@ -41,6 +41,7 @@ class Competition extends Model
         'start_date',
         'end_date',
         'format',
+        'number_of_groups',
         'status',
         'points_win',
         'points_draw',
@@ -57,6 +58,7 @@ class Competition extends Model
         return [
             'start_date' => 'date',
             'end_date' => 'date',
+            'number_of_groups' => 'integer',
             'points_win' => 'integer',
             'points_draw' => 'integer',
             'points_loss' => 'integer',
@@ -143,6 +145,37 @@ class Competition extends Model
 
         return $this->created_by === $user->id
             || $this->organizers()->where('users.id', $user->id)->exists();
+    }
+
+    public function isRoundRobinFormat(): bool
+    {
+        return in_array($this->format, [self::FORMAT_SINGLE_ROUND, self::FORMAT_DOUBLE_ROUND], true);
+    }
+
+    public function isGroupsFormat(): bool
+    {
+        return $this->format === self::FORMAT_GROUPS;
+    }
+
+    public function isKnockoutFormat(): bool
+    {
+        return $this->format === self::FORMAT_KNOCKOUT;
+    }
+
+    /**
+     * Nom usuel du tour d'un tableau à élimination directe, déduit du nombre de matchs qu'il
+     * contient (1 match = Finale, 2 = Demi-finales, 4 = Quarts, 8 = Huitièmes…).
+     */
+    public static function knockoutRoundLabel(int $matchesInRound): string
+    {
+        return match ($matchesInRound) {
+            1 => 'Finale',
+            2 => 'Demi-finales',
+            4 => 'Quarts de finale',
+            8 => 'Huitièmes de finale',
+            16 => 'Seizièmes de finale',
+            default => 'Tour à '.($matchesInRound * 2).' équipes',
+        };
     }
 
     public function isPublished(): bool

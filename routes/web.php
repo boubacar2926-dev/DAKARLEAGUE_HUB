@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\ActivityLogController;
 use App\Http\Controllers\Admin\CompetitionController as AdminCompetitionController;
+use App\Http\Controllers\Admin\ConvocationController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\ExportController;
 use App\Http\Controllers\Admin\LineupController;
@@ -92,8 +93,14 @@ Route::middleware(['auth', 'role:'.User::ROLE_SUPER_ADMIN.','.User::ROLE_ORGANIS
         Route::post('competitions/{competition}/matches/generate', [AdminMatchController::class, 'generate'])
             ->name('competitions.matches.generate');
 
+        Route::post('competitions/{competition}/matches/generate-next-round', [AdminMatchController::class, 'generateNextRound'])
+            ->name('competitions.matches.generate-next-round');
+
         Route::get('matches/{match}/resultat', [MatchResultController::class, 'edit'])->name('matches.result.edit');
         Route::put('matches/{match}/resultat', [MatchResultController::class, 'update'])->name('matches.result.update');
+
+        Route::get('matches/{match}/convocation', [ConvocationController::class, 'edit'])->name('matches.convocation.edit');
+        Route::put('matches/{match}/convocation', [ConvocationController::class, 'update'])->name('matches.convocation.update');
 
         Route::get('matches/{match}/composition', [LineupController::class, 'edit'])->name('matches.lineup.edit');
         Route::put('matches/{match}/composition', [LineupController::class, 'update'])->name('matches.lineup.update');

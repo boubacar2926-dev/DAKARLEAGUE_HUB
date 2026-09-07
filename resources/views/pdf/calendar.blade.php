@@ -30,13 +30,26 @@
     <p style="color:#666;margin:0;">Saison {{ $competition->season }} @if($competition->category) · {{ $competition->category }} @endif</p>
 
     @forelse ($matches as $round => $roundMatches)
-        <h2>Journée {{ $round }}</h2>
+        <h2>
+            @if ($competition->isKnockoutFormat())
+                {{ \App\Models\Competition::knockoutRoundLabel($roundMatches->count()) }}
+            @else
+                Journée {{ $round }}
+            @endif
+        </h2>
         <table>
             @foreach ($roundMatches as $match)
                 <tr>
-                    <td class="teams">{{ $match->homeTeam->name }} — {{ $match->awayTeam->name }}</td>
+                    <td class="teams">
+                        @if ($competition->isGroupsFormat() && $match->homeTeam->group_label)
+                            <span style="color:#999;">[Poule {{ $match->homeTeam->group_label }}]</span>
+                        @endif
+                        {{ $match->homeTeam->name }} — {{ $match->isBye() ? 'exempté' : $match->awayTeam->name }}
+                    </td>
                     <td class="score">
-                        @if ($match->status === 'termine')
+                        @if ($match->isBye())
+                            —
+                        @elseif ($match->status === 'termine')
                             {{ $match->home_score }} - {{ $match->away_score }}
                         @else
                             vs

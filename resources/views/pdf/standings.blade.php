@@ -29,39 +29,15 @@
     <h1>Classement — {{ $competition->name }}</h1>
     <p style="color:#666;margin:0;">Saison {{ $competition->season }} @if($competition->category) · {{ $competition->category }} @endif</p>
 
-    <table>
-        <thead>
-            <tr>
-                <th>#</th>
-                <th>Équipe</th>
-                <th class="center">J</th>
-                <th class="center">V</th>
-                <th class="center">N</th>
-                <th class="center">D</th>
-                <th class="center">BP</th>
-                <th class="center">BC</th>
-                <th class="center">Diff</th>
-                <th class="center">Pts</th>
-            </tr>
-        </thead>
-        <tbody>
-            @forelse ($standings as $row)
-                <tr>
-                    <td>{{ $row['rank'] }}</td>
-                    <td>{{ $row['team']->name }}</td>
-                    <td class="center">{{ $row['played'] }}</td>
-                    <td class="center">{{ $row['won'] }}</td>
-                    <td class="center">{{ $row['drawn'] }}</td>
-                    <td class="center">{{ $row['lost'] }}</td>
-                    <td class="center">{{ $row['goals_for'] }}</td>
-                    <td class="center">{{ $row['goals_against'] }}</td>
-                    <td class="center">{{ $row['goal_difference'] >= 0 ? '+' : '' }}{{ $row['goal_difference'] }}</td>
-                    <td class="center points">{{ $row['points'] }}</td>
-                </tr>
-            @empty
-                <tr><td colspan="10">Aucun match joué pour le moment.</td></tr>
-            @endforelse
-        </tbody>
-    </table>
+    @if ($isKnockout)
+        <p style="color:#666;">Compétition à élimination directe : il n'existe pas de classement, consultez l'export du calendrier pour suivre le tableau.</p>
+    @elseif ($standingsByGroup)
+        @foreach ($standingsByGroup as $groupLabel => $groupStandings)
+            <h2 style="font-size:13px;margin:16px 0 0 0;">Poule {{ $groupLabel }}</h2>
+            @include('pdf._standings-table', ['standings' => $groupStandings])
+        @endforeach
+    @else
+        @include('pdf._standings-table')
+    @endif
 </body>
 </html>

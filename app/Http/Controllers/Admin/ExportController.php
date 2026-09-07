@@ -43,9 +43,11 @@ class ExportController extends Controller
     {
         $this->authorize('view', $competition);
 
-        $standings = $standingsService->calculate($competition);
+        $standingsByGroup = $competition->isGroupsFormat() ? $standingsService->calculateByGroup($competition) : null;
+        $isKnockout = $competition->isKnockoutFormat();
+        $standings = ($standingsByGroup || $isKnockout) ? collect() : $standingsService->calculate($competition);
 
-        $pdf = Pdf::loadView('pdf.standings', compact('competition', 'standings'))->setPaper('a4');
+        $pdf = Pdf::loadView('pdf.standings', compact('competition', 'standings', 'standingsByGroup', 'isKnockout'))->setPaper('a4');
         $downloadName = Str::slug("classement-{$competition->name}-{$competition->season}").'.pdf';
 
         $contents = $pdf->output();

@@ -17,7 +17,32 @@ class StandingsService
      */
     public function calculate(Competition $competition): Collection
     {
-        $rows = $competition->teams()->approved()->get()->keyBy('id')->map(fn ($team) => [
+        return $this->calculateForTeams($competition, $competition->teams()->approved()->get());
+    }
+
+    /**
+     * Classement par poule (format "poules") : chaque groupe tiré au sort par CalendarService
+     * a son propre mini-championnat, les équipes de poules différentes ne s'affrontant jamais.
+     *
+     * @return Collection<string, Collection<int, array<string, mixed>>> indexé par lettre de poule
+     */
+    public function calculateByGroup(Competition $competition): Collection
+    {
+        return $competition->teams()->approved()->get()
+            ->groupBy(fn ($team) => $team->group_label ?? '?')
+            ->sortKeys()
+            ->map(fn ($teams) => $this->calculateForTeams($competition, $teams));
+    }
+
+    /**
+     * @param  Collection<int, \App\Models\Team>  $teams
+     * @return Collection<int, array<string, mixed>>
+     */
+    private function calculateForTeams(Competition $competition, Collection $teams): Collection
+    {
+        $teamIds = $teams->pluck('id');
+
+        $rows = $teams->keyBy('id')->map(fn ($team) => [
             'team' => $team,
             'played' => 0,
             'won' => 0,
@@ -31,10 +56,14 @@ class StandingsService
             'form' => [],
         ]);
 
+        // whereIn sur les deux équipes : un match ne compte pour ce groupe de teamIds que si
+        // ses DEUX équipes en font partie (essentiel pour isoler le classement d'une poule).
         $matches = $competition->matches()
             ->where('status', GameMatch::STATUS_FINISHED)
             ->whereNotNull('home_score')
             ->whereNotNull('away_score')
+            ->whereIn('home_team_id', $teamIds)
+            ->whereIn('away_team_id', $teamIds)
             ->get();
 
         foreach ($matches as $match) {
